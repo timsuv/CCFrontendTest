@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from './AuthContext';
-import { api } from './AuthContext';
+import { useAuth, api } from './AuthContext';
 
 // Type definitions
 interface StripeCheckoutButtonProps {
@@ -99,14 +98,14 @@ const StripeCheckoutButton: React.FC<StripeCheckoutButtonProps> = ({
           if (!auth.isAuthenticated && guestEmail) {
             // Guest template purchase
             response = await api.post('/api/guestpurchase/payment', {
-              guestEmail: guestEmail,
+              guestEmail,
               templateId_Fk: productId
             });
           } else {
             // Logged in user template purchase (uses standard checkout)
             response = await api.post('/api/payments/create-checkout-session', {
               lookupKey: productLookupKey,
-              mode: mode
+              mode
             });
           }
           break;
@@ -120,11 +119,11 @@ const StripeCheckoutButton: React.FC<StripeCheckoutButtonProps> = ({
           // Fallback to generic checkout for backward compatibility
           response = await api.post('/api/payments/create-checkout-session', {
             lookupKey: productLookupKey,
-            mode: mode
+            mode
           });
       }
       
-      const data: CheckoutResponse = response.data as CheckoutResponse;
+      const data = response.data as CheckoutResponse;
       
       // Different endpoints return different properties
       const redirectUrl = data.url || data.checkoutUrl || data.CheckoutUrl;
@@ -138,25 +137,19 @@ const StripeCheckoutButton: React.FC<StripeCheckoutButtonProps> = ({
     } catch (err: any) {
       console.error('Error during checkout:', err);
       
-      // Handle different types of axios errors
       if (err.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        const statusCode = err.response.status;
-        const errorData = err.response.data;
-        
-        if (statusCode === 401) {
+        // Handle API error responses
+        if (err.response.status === 401) {
           setError('Vänligen logga in för att fortsätta');
-        } else if (statusCode === 404) {
-          setError('Tjänsten är inte tillgänglig. Vänligen försök igen senare.');
         } else {
-          setError(errorData?.error || `Fel: ${err.response.statusText}`);
+          const errorMessage = err.response.data?.error || `Fel: ${err.response.statusText}`;
+          setError(errorMessage);
         }
       } else if (err.request) {
         // The request was made but no response was received
         setError('Kunde inte nå servern. Kontrollera din internetanslutning.');
       } else {
-        // Something happened in setting up the request that triggered an Error
+        // Something happened in setting up the request
         setError(err.message || 'Kunde inte starta betalningen. Försök igen.');
       }
     } finally {
@@ -168,7 +161,7 @@ const StripeCheckoutButton: React.FC<StripeCheckoutButtonProps> = ({
     <div className="flex flex-col items-center">
       {error && (
         <div className="mb-4 w-full">
-          <div className="bg-red-50 border border-red-200 p-4 rounded-md text-red-700 mb-4">
+          <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
             <span>{error}</span>
           </div>
         </div>
@@ -177,7 +170,7 @@ const StripeCheckoutButton: React.FC<StripeCheckoutButtonProps> = ({
       <button
         onClick={handleCheckout}
         disabled={loading}
-        className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg flex items-center justify-center"
+        className="bg-pink-400 hover:bg-pink-500 text-white font-medium py-2 px-6 rounded-lg flex items-center justify-center"
       >
         {loading ? (
           <>
@@ -192,7 +185,7 @@ const StripeCheckoutButton: React.FC<StripeCheckoutButtonProps> = ({
   );
 };
 
-// Stripe Portal button using axios
+// Stripe Portal button updated to use api from AuthContext
 const StripePortalButton: React.FC<StripePortalButtonProps> = ({ 
   sessionId, 
   buttonText = "Hantera prenumeration" 
@@ -214,10 +207,10 @@ const StripePortalButton: React.FC<StripePortalButtonProps> = ({
     
     try {
       const response = await api.post('/api/payments/create-portal-session', {
-        sessionId: sessionId
+        sessionId
       });
       
-      const data = response.data as { url?: string };
+      const data = response.data as CheckoutResponse;
       
       if (!data.url) {
         throw new Error('Ingen portal-URL returnerades från servern');
@@ -228,25 +221,19 @@ const StripePortalButton: React.FC<StripePortalButtonProps> = ({
     } catch (err: any) {
       console.error('Error accessing portal:', err);
       
-      // Handle different types of axios errors
       if (err.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        const statusCode = err.response.status;
-        const errorData = err.response.data;
-        
-        if (statusCode === 401) {
+        // Handle API error responses
+        if (err.response.status === 401) {
           setError('Vänligen logga in för att fortsätta');
-        } else if (statusCode === 404) {
-          setError('Tjänsten är inte tillgänglig. Vänligen försök igen senare.');
         } else {
-          setError(errorData?.error || `Fel: ${err.response.statusText}`);
+          const errorMessage = err.response.data?.error || `Fel: ${err.response.statusText}`;
+          setError(errorMessage);
         }
       } else if (err.request) {
         // The request was made but no response was received
         setError('Kunde inte nå servern. Kontrollera din internetanslutning.');
       } else {
-        // Something happened in setting up the request that triggered an Error
+        // Something happened in setting up the request
         setError(err.message || 'Kunde inte öppna portalen. Försök igen.');
       }
     } finally {
@@ -258,7 +245,7 @@ const StripePortalButton: React.FC<StripePortalButtonProps> = ({
     <div className="flex flex-col items-center">
       {error && (
         <div className="mb-4 w-full">
-          <div className="bg-red-50 border border-red-200 p-4 rounded-md text-red-700 mb-4">
+          <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
             <span>{error}</span>
           </div>
         </div>
@@ -267,7 +254,7 @@ const StripePortalButton: React.FC<StripePortalButtonProps> = ({
       <button
         onClick={handlePortalAccess}
         disabled={loading}
-        className="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-6 rounded-lg flex items-center justify-center"
+        className="bg-pink-400 hover:bg-pink-500 text-white font-medium py-2 px-6 rounded-lg flex items-center justify-center"
       >
         {loading ? (
           <>
@@ -380,14 +367,6 @@ const GuestTemplatePurchase: React.FC<TemplateCardProps> = ({
     setEmail(e.target.value);
     setEmailError(null);
   };
-
-  const handleValidateBeforeSubmit = () => {
-    if (!auth.isAuthenticated && !validateEmail(email)) {
-      setEmailError("Vänligen ange en giltig e-postadress");
-      return false;
-    }
-    return true;
-  };
   
   return (
     <div className="p-6 border rounded-lg shadow-sm hover:shadow-md transition-shadow w-full max-w-sm">
@@ -409,11 +388,11 @@ const GuestTemplatePurchase: React.FC<TemplateCardProps> = ({
             id={`guest-email-${id}`}
             value={email}
             onChange={handleEmailChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-300"
             placeholder="dinmail@exempel.se"
             onBlur={() => {
               if (email && !validateEmail(email)) {
-                setEmailError("Ogiltig e-postadress format");
+                setEmailError("Ogiltig e-postadress");
               }
             }}
           />
@@ -445,31 +424,6 @@ const CombinedProductsPage: React.FC = () => {
   const success = urlParams.get('success');
   const purchaseType = urlParams.get('purchase_type');
   
-  // Testing API connection
-  const testApiConnection = async () => {
-    try {
-      setIsPageLoading(true);
-      const response = await api.get('/api/test');
-      console.log('API connection test successful:', response.data);
-      alert('API connection successful: ' + JSON.stringify(response.data));
-    } catch (error: any) {
-      console.error('API connection test failed:', error);
-      let errorMessage = 'API connection failed';
-      
-      if (error.response) {
-        errorMessage += `: ${error.response.status} ${error.response.statusText}`;
-      } else if (error.request) {
-        errorMessage += ': No response received from server';
-      } else {
-        errorMessage += `: ${error.message}`;
-      }
-      
-      alert(errorMessage);
-    } finally {
-      setIsPageLoading(false);
-    }
-  };
-  
   useEffect(() => {
     // Check URL params and scroll to the appropriate section if needed
     if (success === 'true' && purchaseType) {
@@ -483,7 +437,7 @@ const CombinedProductsPage: React.FC = () => {
   if (isPageLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="h-8 w-8 animate-spin border-4 border-blue-500 border-t-transparent rounded-full"></div>
+        <div className="h-8 w-8 animate-spin border-4 border-pink-400 border-t-transparent rounded-full"></div>
       </div>
     );
   }
@@ -496,25 +450,10 @@ const CombinedProductsPage: React.FC = () => {
           <p>För att få tillgång till alla funktioner och fördelar, logga in eller skapa ett konto.</p>
           <button 
             onClick={() => window.location.href = '/login'} 
-            className="mt-4 bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-2 px-6 rounded-lg"
+            className="mt-4 bg-pink-400 hover:bg-pink-500 text-white font-medium py-2 px-6 rounded-lg"
           >
             Logga in
           </button>
-        </div>
-      )}
-      
-      {/* Developer Testing Tools (only in development) */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="mb-8 bg-blue-50 border border-blue-200 p-4 rounded-md">
-          <h2 className="text-xl font-bold mb-2">Utvecklarverktyg</h2>
-          <div className="flex space-x-4">
-            <button 
-              onClick={testApiConnection}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg"
-            >
-              Testa API-anslutning
-            </button>
-          </div>
         </div>
       )}
       
