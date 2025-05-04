@@ -9,6 +9,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
 import Stripe from "./components/Stripe";
+import CoursesPage from "./pages/CoursePages";
 // const Dashboard = () => (
 //   <div className="p-4">
 //     <h1>Dashboard</h1>
@@ -48,6 +49,8 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+
+            <Route path="/search" element={<CoursesPage />} />
 
             <Route path="/pay" element={<Stripe />} />
 
