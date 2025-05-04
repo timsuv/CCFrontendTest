@@ -1,11 +1,11 @@
+// src/types/course.types.ts
 export interface Course {
-    id: number;
+    courseId: number;
     title: string;
     description: string;
     category: string;
     level: string;
     price: number;
-    // Add other properties from your CourseDto
   }
   
   export interface CourseSearchDto {
@@ -19,10 +19,9 @@ export interface Course {
   export interface CourseSearchRequestDto {
     search?: string;
     category?: string;
-    priceRange?: string;
     level?: string;
-    minPrice?: number;
-    maxPrice?: number;
+    minPrice?: number;    // For min price
+    maxPrice?: number;    // For max price
     page: number;
     pageSize: number;
   }

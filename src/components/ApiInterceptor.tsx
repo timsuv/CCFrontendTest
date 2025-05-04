@@ -381,13 +381,6 @@ const GuestTemplatePurchase: React.FC<TemplateCardProps> = ({
     setEmailError(null);
   };
 
-  const handleValidateBeforeSubmit = () => {
-    if (!auth.isAuthenticated && !validateEmail(email)) {
-      setEmailError("Vänligen ange en giltig e-postadress");
-      return false;
-    }
-    return true;
-  };
   
   return (
     <div className="p-6 border rounded-lg shadow-sm hover:shadow-md transition-shadow w-full max-w-sm">

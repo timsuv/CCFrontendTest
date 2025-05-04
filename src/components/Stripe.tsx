@@ -416,7 +416,7 @@ const GuestTemplatePurchase: React.FC<TemplateCardProps> = ({
 // Combined page for all products
 const CombinedProductsPage: React.FC = () => {
   const { isAuthenticated } = useAuth();
-  const [isPageLoading, setIsPageLoading] = useState<boolean>(false);
+  const [isPageLoading] = useState<boolean>(false);
   
   // Get the session ID from URL if user just completed checkout
   const urlParams = new URLSearchParams(window.location.search);

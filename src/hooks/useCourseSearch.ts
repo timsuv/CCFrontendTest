@@ -3,7 +3,6 @@ import { courseService } from '../services/CourseService';
 import { 
   CourseSearchDto, 
   CourseSearchRequestDto, 
-  CourseSearchResponseDto 
 } from '../types/course.types';
 
 interface UseCourseSearchResult {

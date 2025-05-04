@@ -1,9 +1,10 @@
+// src/components/AllCourses.tsx
 import React from 'react';
 import { useCourses } from '../hooks/userCourses';
 import { Course } from '../types/course.types';
 
 const AllCourses: React.FC = () => {
-  const { courses, loading, error, refetch } = useCourses() as { courses: Course[]; loading: boolean; error: string | null; refetch: () => void };
+  const { courses, loading, error, refetch } = useCourses();
 
   if (loading) {
     return (
@@ -33,7 +34,7 @@ const AllCourses: React.FC = () => {
       <h1 className="text-2xl font-bold mb-6">Alla kurser</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {courses.map((course) => (
-          <CourseCard key={course.id} course={course} />
+          <CourseCard key={course.courseId} course={course} /> // Use courseId as key
         ))}
       </div>
     </div>
